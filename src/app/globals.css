@@ -1,26 +1,205 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/*
+  SolarDesy. One palette: deep navy ink, cool paper, SolarDesy blue and a red accent (the small red block in the logo).
+  Layout concept: editorial, left-aligned section heads on a 12-column grid; product screens sit on tinted "stages";
+  full-bleed photography marks the big transitions. Light theme only.
+*/
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-ink: #0c1830;
+  --color-ink-soft: #3d4b63;
+  --color-mute: #66748c;
+  --color-paper: #f4f7fc;
+  --color-card: #ffffff;
+  --color-line: #dde5f0;
+  --color-brand: #2358b3;
+  --color-brand-deep: #183f85;
+  --color-brand-ink: #0d2a5c;
+  --color-navy: #0b1f44;
+  --color-mint: #e6eefb;
+  --color-sun: #e0372c;
+  --color-sun-soft: #fde8e6;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display-face);
+  --shadow-lift: 0 1px 2px rgb(12 24 48 / 0.05), 0 12px 32px -12px rgb(12 24 48 / 0.18);
+  --shadow-float: 0 2px 4px rgb(12 24 48 / 0.06), 0 32px 80px -24px rgb(12 24 48 / 0.35);
+  --shadow-deep: 0 40px 120px -30px rgb(12 24 48 / 0.45), 0 2px 6px rgb(12 24 48 / 0.08);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light; /* one light theme: browsers and the OS never darken the page or its form controls */
+  scroll-behavior: smooth;
+  scroll-padding-top: 6.5rem;
+  background: var(--color-paper);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+/* headings use the display face; the optical size follows the font size */
+h1, h2, h3, .font-display {
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-optical-sizing: auto;
+}
+
+::selection {
+  background: #cfe0fa;
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* ───────────── motion ─────────────
+   Two kinds: the page-load sequence of the hero (time-based), and reveals driven by scroll position (scroll timelines).
+   Browsers without scroll-driven animation show everything at rest; reduced motion turns all of it off. */
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes rise-soft {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96) translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes tilt-in {
+  from { opacity: 0; transform: perspective(1600px) rotateX(9deg) translateY(56px); }
+  to { opacity: 1; transform: perspective(1600px) rotateX(0deg) translateY(0); }
+}
+@keyframes kenburns {
+  from { transform: scale(1.1) translateY(1.5%); }
+  to { transform: scale(1) translateY(0); }
+}
+@keyframes para {
+  from { transform: translateY(-7%) scale(1.14); }
+  to { transform: translateY(7%) scale(1.14); }
+}
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+
+/* page load (the hero) */
+.rise { animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: var(--d, 0ms); }
+.tilt-in { animation: tilt-in 1.3s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: var(--d, 0ms); transform-origin: 50% 0; }
+.kenburns { animation: kenburns 16s cubic-bezier(0.2, 0.6, 0.2, 1) both; }
+
+/* scroll position */
+@supports (animation-timeline: view()) {
+  .reveal { animation: rise linear both; animation-timeline: view(); animation-range: entry 0% entry 35%; }
+  .reveal-scale { animation: scale-in linear both; animation-timeline: view(); animation-range: entry 0% entry 40%; }
+  .stagger > * { animation: rise-soft linear both; animation-timeline: view(); animation-range: entry 0% entry 30%; }
+  .stagger > :nth-child(2) { animation-range: entry 8% entry 38%; }
+  .stagger > :nth-child(3) { animation-range: entry 16% entry 46%; }
+  .stagger > :nth-child(4) { animation-range: entry 24% entry 54%; }
+  .stagger > :nth-child(5) { animation-range: entry 32% entry 62%; }
+  .stagger > :nth-child(6) { animation-range: entry 40% entry 70%; }
+  /* a photo inside an overflow-hidden box drifts slowly against the scroll */
+  .para-img { animation: para linear both; animation-timeline: view(); animation-range: entry 0% exit 100%; }
+}
+
+/* the marquee of integrations: two copies of the list, the track slides one copy's width */
+.marquee { mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
+.marquee-track { width: max-content; animation: marquee 42s linear infinite; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+/* a floating card bobs gently */
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, -10px, 0); }
+}
+.float { animation: drift 5s ease-in-out infinite alternate; }
+
+/* the sun's path in the designer mock draws itself */
+@keyframes sweep {
+  from { stroke-dashoffset: 400; }
+  to { stroke-dashoffset: 0; }
+}
+.sweep { stroke-dasharray: 400; animation: sweep 2.4s ease-out 0.3s both; }
+
+/* the journey: a card that changes as the story moves, and a chip that pops in beside it */
+@keyframes chapter-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pop {
+  0% { opacity: 0; transform: translateY(10px) scale(0.92); }
+  100% { opacity: 1; transform: none; }
+}
+.chapter-in { animation: chapter-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.pop { animation: pop 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+@keyframes menu-in {
+  from { transform: translateX(100%); }
+  to { transform: none; }
+}
+.menu-in { animation: menu-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .rise, .tilt-in, .kenburns, .reveal, .reveal-scale, .stagger > *, .para-img, .float, .sweep, .chapter-in, .pop, .menu-in { animation: none !important; }
+  .marquee-track { animation: none; width: auto; flex-wrap: wrap; justify-content: center; }
+  .marquee { mask-image: none; }
+}
+
+/* ───────────── surfaces ───────────── */
+
+/* a tinted stage behind product screens: a soft blue field with a fine dot grid */
+.stage {
+  background-color: var(--color-mint);
+  background-image:
+    radial-gradient(rgb(35 88 179 / 0.14) 1px, transparent 1.2px),
+    linear-gradient(160deg, #e9f0fb 0%, #f4f7fc 55%, #eef3fb 100%);
+  background-size: 18px 18px, 100% 100%;
+}
+
+/* fine film grain over photography, so flat gradients don't band */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* the soft brand glow behind the closing call to action */
+.rays {
+  background:
+    radial-gradient(60rem 30rem at 85% -10%, rgb(224 55 44 / 0.12), transparent 60%),
+    radial-gradient(50rem 28rem at 0% 0%, rgb(35 88 179 / 0.16), transparent 60%);
+}
+.grid-lines {
+  background-image:
+    linear-gradient(to right, rgb(12 24 48 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(12 24 48 / 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 75%);
+}
+
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* On wide screens the journey's chapter card sits at the right, so the house moves left; on a phone the house stays centred. */
+.house-shift { transform: translateX(0); }
+.phone-shift { transform: translateX(200px); }
+@media (min-width: 1024px) {
+  .house-shift { transform: translateX(-170px); }
+  .phone-shift { transform: translateX(-110px); }
 }
